@@ -191,8 +191,17 @@ const FlightResults = () => {
           {/* Price & Action */}
           <div className="text-center lg:text-right border-t lg:border-t-0 lg:border-l-2 border-gray-200 pt-4 lg:pt-0 lg:pl-6">
             <div className="text-sm text-gray-600 mb-1">Mulai dari</div>
-            <div className="text-2xl lg:text-3xl font-bold text-primary-600 mb-3">
+            <div className="text-2xl lg:text-3xl font-bold text-primary-600 mb-1">
               {formatPrice(flight.price.total, flight.price.currency)}
+            </div>
+            <div className="text-xs text-gray-500 mb-3">
+              {formatPrice(
+                (
+                  parseFloat(flight.price.total) / (searchParams?.adults || 1)
+                ).toFixed(2),
+                flight.price.currency
+              )}{" "}
+              / orang
             </div>
             <button
               className="btn-primary w-full lg:w-auto"

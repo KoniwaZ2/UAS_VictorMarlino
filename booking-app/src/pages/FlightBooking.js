@@ -735,53 +735,124 @@ const FlightBooking = () => {
               {/* Passenger Count */}
               <div className="mb-6 p-3 border-2 border-gray-200 rounded-lg">
                 <div className="flex justify-between py-2">
-                  <span className="text-gray-600 font-semibold">Penumpang</span>
+                  <span className="text-gray-600 font-semibold">
+                    👥 Jumlah Penumpang
+                  </span>
                   <span className="font-bold text-gray-800">
                     {passengers.length} Orang
                   </span>
                 </div>
               </div>
 
-              <div className="bg-primary-50 rounded-lg p-4 border-2 border-primary-200">
-                <div className="space-y-2">
+              {/* Price Breakdown */}
+              <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-lg p-5 border-2 border-primary-200 shadow-md">
+                <h3 className="font-bold text-gray-800 mb-4 text-lg">
+                  💰 Rincian Harga
+                </h3>
+
+                <div className="space-y-3">
+                  {/* Departure Flight Price */}
+                  <div className="bg-white rounded-lg p-3 shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-gray-700">
+                        ✈️ Tiket Pergi
+                      </span>
+                      <span className="text-sm font-bold text-primary-600">
+                        {formatPrice(flight.price.total, flight.price.currency)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                      <span>Per orang</span>
+                      <span>
+                        {formatPrice(
+                          (
+                            parseFloat(flight.price.total) / passengers.length
+                          ).toFixed(2),
+                          flight.price.currency
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Return Flight Price */}
                   {returnFlight && (
-                    <>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Tiket Pergi</span>
-                        <span className="font-semibold text-gray-700">
-                          {formatPrice(
-                            flight.price.total,
-                            flight.price.currency
-                          )}
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-gray-700">
+                          🔄 Tiket Pulang
                         </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Tiket Pulang</span>
-                        <span className="font-semibold text-gray-700">
+                        <span className="text-sm font-bold text-green-600">
                           {formatPrice(
                             returnFlight.price.total,
                             returnFlight.price.currency
                           )}
                         </span>
                       </div>
-                      <div className="border-t-2 border-primary-300 pt-2"></div>
-                    </>
+                      <div className="flex justify-between items-center text-xs text-gray-500">
+                        <span>Per orang</span>
+                        <span>
+                          {formatPrice(
+                            (
+                              parseFloat(returnFlight.price.total) /
+                              passengers.length
+                            ).toFixed(2),
+                            returnFlight.price.currency
+                          )}
+                        </span>
+                      </div>
+                    </div>
                   )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700 font-semibold">
-                      Total Pembayaran
-                    </span>
-                    <span className="text-2xl font-bold text-primary-600">
-                      {formatPrice(
-                        (
-                          parseFloat(flight.price.total) +
-                          (returnFlight
-                            ? parseFloat(returnFlight.price.total)
-                            : 0)
-                        ).toFixed(2),
-                        flight.price.currency
-                      )}
-                    </span>
+
+                  {/* Subtotal per Person */}
+                  <div className="border-t-2 border-gray-200 pt-3">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-semibold text-gray-700">
+                        Harga per Orang
+                      </span>
+                      <span className="text-sm font-bold text-gray-800">
+                        {formatPrice(
+                          (
+                            (parseFloat(flight.price.total) +
+                              (returnFlight
+                                ? parseFloat(returnFlight.price.total)
+                                : 0)) /
+                            passengers.length
+                          ).toFixed(2),
+                          flight.price.currency
+                        )}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 text-right">
+                      × {passengers.length} penumpang
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="bg-primary-600 text-white rounded-lg p-4 shadow-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-xs opacity-90 mb-1">
+                          Total Pembayaran
+                        </div>
+                        <div className="text-2xl font-bold">
+                          {formatPrice(
+                            (
+                              parseFloat(flight.price.total) +
+                              (returnFlight
+                                ? parseFloat(returnFlight.price.total)
+                                : 0)
+                            ).toFixed(2),
+                            flight.price.currency
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs opacity-90">Untuk</div>
+                        <div className="text-lg font-bold">
+                          {passengers.length} Orang
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
