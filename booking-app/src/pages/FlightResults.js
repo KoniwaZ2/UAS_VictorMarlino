@@ -12,17 +12,32 @@ const FlightResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { flights = [], searchParams, dictionaries } = location.state || {};
+  const {
+    flights = [],
+    searchParams,
+    dictionaries,
+    returnFlights = [],
+    selectedDepartureFlight = null,
+  } = location.state || {};
   const [sortedFlights, setSortedFlights] = useState([]);
   const [sortBy, setSortBy] = useState("price");
   const [selectedStops, setSelectedStops] = useState("all");
+  const [isSelectingReturn, setIsSelectingReturn] = useState(false);
+  const [departureFlight, setDepartureFlight] = useState(
+    selectedDepartureFlight
+  );
 
   useEffect(() => {
     if (!flights || flights.length === 0) {
     } else {
       setSortedFlights(flights);
+      // Check if we're showing return flights
+      if (selectedDepartureFlight && returnFlights.length > 0) {
+        setIsSelectingReturn(true);
+        setDepartureFlight(selectedDepartureFlight);
+      }
     }
-  }, [flights, navigate]);
+  }, [flights, navigate, selectedDepartureFlight, returnFlights]);
 
   useEffect(() => {
     let filtered = [...flights];
@@ -55,13 +70,26 @@ const FlightResults = () => {
   }, [flights, sortBy, selectedStops]);
 
   const handleFlightSelect = (flight) => {
-    navigate("/booking", {
-      state: {
-        flight,
-        searchParams,
-        dictionaries,
-      },
-    });
+    // If round trip and selecting departure flight
+    if (searchParams?.tripType === "roundTrip" && !isSelectingReturn) {
+      // Show return flights
+      setDepartureFlight(flight);
+      setIsSelectingReturn(true);
+      setSortedFlights(returnFlights);
+      setSortBy("price");
+      setSelectedStops("all");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // Go to booking page
+      navigate("/booking", {
+        state: {
+          flight: isSelectingReturn ? departureFlight : flight,
+          returnFlight: isSelectingReturn ? flight : null,
+          searchParams,
+          dictionaries,
+        },
+      });
+    }
   };
 
   const getAirlineName = (carrierCode) => {
@@ -221,7 +249,18 @@ const FlightResults = () => {
       <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-8 px-4">
         <div className="container mx-auto max-w-7xl">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              if (isSelectingReturn) {
+                // Go back to departure flights
+                setIsSelectingReturn(false);
+                setDepartureFlight(null);
+                setSortedFlights(flights);
+                setSortBy("price");
+                setSelectedStops("all");
+              } else {
+                navigate("/");
+              }
+            }}
             className="flex items-center text-white hover:text-blue-100 mb-4 transition-colors duration-300"
           >
             <svg
@@ -237,18 +276,70 @@ const FlightResults = () => {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Ubah Pencarian
+            {isSelectingReturn
+              ? "Kembali ke Penerbangan Keberangkatan"
+              : "Ubah Pencarian"}
           </button>
 
           <h1 className="text-3xl font-bold mb-2">
-            Hasil Pencarian Penerbangan
+            {isSelectingReturn
+              ? "Pilih Penerbangan Kepulangan"
+              : "Hasil Pencarian Penerbangan"}
           </h1>
           <p className="text-blue-100">
-            {searchParams?.origin} → {searchParams?.destination} •{" "}
-            {formatDate(searchParams?.departureDate)}
-            {searchParams?.returnDate &&
-              ` • Pulang: ${formatDate(searchParams?.returnDate)}`}
+            {isSelectingReturn ? (
+              <>
+                {searchParams?.destination} → {searchParams?.origin} •{" "}
+                {formatDate(searchParams?.returnDate)}
+              </>
+            ) : (
+              <>
+                {searchParams?.origin} → {searchParams?.destination} •{" "}
+                {formatDate(searchParams?.departureDate)}
+                {searchParams?.returnDate &&
+                  ` • Pulang: ${formatDate(searchParams?.returnDate)}`}
+              </>
+            )}
           </p>
+
+          {/* Progress Indicator for Round Trip */}
+          {searchParams?.tripType === "roundTrip" && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <div
+                className={`flex items-center ${
+                  !isSelectingReturn ? "text-white font-bold" : "text-blue-200"
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
+                    !isSelectingReturn
+                      ? "bg-white text-primary-600"
+                      : "bg-blue-400"
+                  }`}
+                >
+                  {departureFlight ? "✓" : "1"}
+                </div>
+                <span>Pergi</span>
+              </div>
+              <div className="w-16 h-1 bg-blue-300 rounded"></div>
+              <div
+                className={`flex items-center ${
+                  isSelectingReturn ? "text-white font-bold" : "text-blue-200"
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
+                    isSelectingReturn
+                      ? "bg-white text-primary-600"
+                      : "bg-blue-400"
+                  }`}
+                >
+                  2
+                </div>
+                <span>Pulang</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

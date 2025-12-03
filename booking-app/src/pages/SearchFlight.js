@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import amadeusService from "../services/amadeusService";
+import { searchLocationsWithFallback } from "../utils/airportDatabase";
 
 const SearchFlight = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const SearchFlight = () => {
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
   const [showDestinationSuggestions, setShowDestinationSuggestions] =
     useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -42,40 +44,114 @@ const SearchFlight = () => {
     }));
   };
 
-  const handleOriginSearch = async (value) => {
+  const handleOriginSearch = (value) => {
     setFormData((prev) => ({ ...prev, origin: value }));
-    console.log("Origin search triggered with value:", value);
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
     if (value.length >= 2) {
-      try {
-        console.log("Fetching origin locations...");
-        const locations = await amadeusService.searchLocations(value);
-        console.log("Origin locations received:", locations);
-        setOriginSuggestions(locations);
-        setShowOriginSuggestions(true);
-      } catch (error) {
-        console.error("Error searching origin:", error);
-      }
+      // Set new timeout for debouncing
+      const timeout = setTimeout(async () => {
+        try {
+          // Try to get results from Amadeus API
+          let amadeusResults = [];
+          try {
+            amadeusResults = await amadeusService.searchLocations(value);
+            if (!Array.isArray(amadeusResults)) {
+              amadeusResults = [];
+            }
+          } catch (apiError) {
+            console.warn("Amadeus API error, using local database:", apiError);
+          }
+
+          // Combine with local database
+          const combinedResults = searchLocationsWithFallback(
+            value,
+            amadeusResults
+          );
+
+          if (combinedResults.length > 0) {
+            setOriginSuggestions(combinedResults);
+            setShowOriginSuggestions(true);
+          } else {
+            setOriginSuggestions([]);
+            setShowOriginSuggestions(false);
+          }
+        } catch (error) {
+          console.error("Error searching origin:", error);
+          // Even on error, try to show local results
+          const localResults = searchLocationsWithFallback(value, []);
+          if (localResults.length > 0) {
+            setOriginSuggestions(localResults);
+            setShowOriginSuggestions(true);
+          } else {
+            setOriginSuggestions([]);
+            setShowOriginSuggestions(false);
+          }
+        }
+      }, 300); // Wait 300ms after user stops typing
+
+      setSearchTimeout(timeout);
     } else {
       setOriginSuggestions([]);
       setShowOriginSuggestions(false);
     }
   };
 
-  const handleDestinationSearch = async (value) => {
+  const handleDestinationSearch = (value) => {
     setFormData((prev) => ({ ...prev, destination: value }));
-    console.log("Destination search triggered with value:", value);
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
     if (value.length >= 2) {
-      try {
-        console.log("Fetching destination locations...");
-        const locations = await amadeusService.searchLocations(value);
-        console.log("Destination locations received:", locations);
-        setDestinationSuggestions(locations);
-        setShowDestinationSuggestions(true);
-      } catch (error) {
-        console.error("Error searching destination:", error);
-      }
+      // Set new timeout for debouncing
+      const timeout = setTimeout(async () => {
+        try {
+          // Try to get results from Amadeus API
+          let amadeusResults = [];
+          try {
+            amadeusResults = await amadeusService.searchLocations(value);
+            if (!Array.isArray(amadeusResults)) {
+              amadeusResults = [];
+            }
+          } catch (apiError) {
+            console.warn("Amadeus API error, using local database:", apiError);
+          }
+
+          // Combine with local database
+          const combinedResults = searchLocationsWithFallback(
+            value,
+            amadeusResults
+          );
+
+          if (combinedResults.length > 0) {
+            setDestinationSuggestions(combinedResults);
+            setShowDestinationSuggestions(true);
+          } else {
+            setDestinationSuggestions([]);
+            setShowDestinationSuggestions(false);
+          }
+        } catch (error) {
+          console.error("Error searching destination:", error);
+          // Even on error, try to show local results
+          const localResults = searchLocationsWithFallback(value, []);
+          if (localResults.length > 0) {
+            setDestinationSuggestions(localResults);
+            setShowDestinationSuggestions(true);
+          } else {
+            setDestinationSuggestions([]);
+            setShowDestinationSuggestions(false);
+          }
+        }
+      }, 300); // Wait 300ms after user stops typing
+
+      setSearchTimeout(timeout);
     } else {
       setDestinationSuggestions([]);
       setShowDestinationSuggestions(false);
@@ -114,24 +190,37 @@ const SearchFlight = () => {
     setLoading(true);
 
     try {
-      const searchParams = {
+      // Search for departure flights
+      const departureParams = {
         origin: formData.origin,
         destination: formData.destination,
         departureDate: formData.departureDate,
         adults: formData.adults,
       };
 
-      if (formData.tripType === "roundTrip") {
-        searchParams.returnDate = formData.returnDate;
-      }
+      const departureResults = await amadeusService.searchFlights(
+        departureParams
+      );
 
-      const results = await amadeusService.searchFlights(searchParams);
+      // If round trip, also search for return flights
+      let returnResults = null;
+      if (formData.tripType === "roundTrip" && formData.returnDate) {
+        const returnParams = {
+          origin: formData.destination, // Swap origin and destination
+          destination: formData.origin,
+          departureDate: formData.returnDate,
+          adults: formData.adults,
+        };
+
+        returnResults = await amadeusService.searchFlights(returnParams);
+      }
 
       navigate("/results", {
         state: {
-          flights: results.data || [],
+          flights: departureResults.data || [],
+          returnFlights: returnResults?.data || [],
           searchParams: formData,
-          dictionaries: results.dictionaries,
+          dictionaries: departureResults.dictionaries,
         },
       });
     } catch (err) {

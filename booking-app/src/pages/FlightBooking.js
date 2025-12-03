@@ -13,7 +13,8 @@ const FlightBooking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { flight, searchParams, dictionaries } = location.state || {};
+  const { flight, returnFlight, searchParams, dictionaries } =
+    location.state || {};
 
   const [passengers, setPassengers] = useState([
     {
@@ -588,76 +589,200 @@ const FlightBooking = () => {
                 Ringkasan Penerbangan
               </h2>
 
+              {/* Departure Flight */}
               <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src={getAirlineLogo(carrierCode)}
-                    alt={carrierCode}
-                    className="w-12 h-12 object-contain"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/48x48?text=" + carrierCode;
-                    }}
-                  />
-                  <div>
-                    <div className="font-bold text-gray-800">
-                      {getAirlineName(carrierCode)}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {carrierCode} {firstSegment.number}
-                    </div>
-                  </div>
+                <div className="bg-primary-50 px-3 py-2 rounded-t-lg border-b-2 border-primary-200">
+                  <h3 className="font-bold text-primary-700">
+                    ✈️ Penerbangan Pergi
+                  </h3>
                 </div>
+                <div className="p-3 border-l-2 border-r-2 border-b-2 border-gray-200 rounded-b-lg">
+                  <div className="flex items-center gap-3 mb-4">
+                    <img
+                      src={getAirlineLogo(carrierCode)}
+                      alt={carrierCode}
+                      className="w-12 h-12 object-contain"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://via.placeholder.com/48x48?text=" +
+                          carrierCode;
+                      }}
+                    />
+                    <div>
+                      <div className="font-bold text-gray-800">
+                        {getAirlineName(carrierCode)}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {carrierCode} {firstSegment.number}
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Keberangkatan</span>
-                    <span className="font-semibold text-gray-800">
-                      {firstSegment.departure.iataCode}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Tujuan</span>
-                    <span className="font-semibold text-gray-800">
-                      {lastSegment.arrival.iataCode}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Tanggal</span>
-                    <span className="font-semibold text-gray-800">
-                      {formatDate(firstSegment.departure.at)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Waktu</span>
-                    <span className="font-semibold text-gray-800">
-                      {formatTime(firstSegment.departure.at)} -{" "}
-                      {formatTime(lastSegment.arrival.at)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Durasi</span>
-                    <span className="font-semibold text-gray-800">
-                      {formatDuration(itinerary.duration)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Penumpang</span>
-                    <span className="font-semibold text-gray-800">
-                      {passengers.length} Orang
-                    </span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Keberangkatan</span>
+                      <span className="font-semibold text-gray-800">
+                        {firstSegment.departure.iataCode}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Tujuan</span>
+                      <span className="font-semibold text-gray-800">
+                        {lastSegment.arrival.iataCode}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Tanggal</span>
+                      <span className="font-semibold text-gray-800">
+                        {formatDate(firstSegment.departure.at)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Waktu</span>
+                      <span className="font-semibold text-gray-800">
+                        {formatTime(firstSegment.departure.at)} -{" "}
+                        {formatTime(lastSegment.arrival.at)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Durasi</span>
+                      <span className="font-semibold text-gray-800">
+                        {formatDuration(itinerary.duration)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              {/* Return Flight */}
+              {returnFlight &&
+                (() => {
+                  const returnItinerary = returnFlight.itineraries[0];
+                  const returnFirstSegment = returnItinerary.segments[0];
+                  const returnLastSegment =
+                    returnItinerary.segments[
+                      returnItinerary.segments.length - 1
+                    ];
+                  const returnCarrierCode = returnFirstSegment.carrierCode;
+
+                  return (
+                    <div className="mb-6">
+                      <div className="bg-green-50 px-3 py-2 rounded-t-lg border-b-2 border-green-200">
+                        <h3 className="font-bold text-green-700">
+                          🔄 Penerbangan Pulang
+                        </h3>
+                      </div>
+                      <div className="p-3 border-l-2 border-r-2 border-b-2 border-gray-200 rounded-b-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <img
+                            src={getAirlineLogo(returnCarrierCode)}
+                            alt={returnCarrierCode}
+                            className="w-12 h-12 object-contain"
+                            onError={(e) => {
+                              e.target.src =
+                                "https://via.placeholder.com/48x48?text=" +
+                                returnCarrierCode;
+                            }}
+                          />
+                          <div>
+                            <div className="font-bold text-gray-800">
+                              {getAirlineName(returnCarrierCode)}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {returnCarrierCode} {returnFirstSegment.number}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Keberangkatan</span>
+                            <span className="font-semibold text-gray-800">
+                              {returnFirstSegment.departure.iataCode}
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Tujuan</span>
+                            <span className="font-semibold text-gray-800">
+                              {returnLastSegment.arrival.iataCode}
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Tanggal</span>
+                            <span className="font-semibold text-gray-800">
+                              {formatDate(returnFirstSegment.departure.at)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Waktu</span>
+                            <span className="font-semibold text-gray-800">
+                              {formatTime(returnFirstSegment.departure.at)} -{" "}
+                              {formatTime(returnLastSegment.arrival.at)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Durasi</span>
+                            <span className="font-semibold text-gray-800">
+                              {formatDuration(returnItinerary.duration)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              {/* Passenger Count */}
+              <div className="mb-6 p-3 border-2 border-gray-200 rounded-lg">
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-600 font-semibold">Penumpang</span>
+                  <span className="font-bold text-gray-800">
+                    {passengers.length} Orang
+                  </span>
+                </div>
+              </div>
+
               <div className="bg-primary-50 rounded-lg p-4 border-2 border-primary-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 font-semibold">
-                    Total Pembayaran
-                  </span>
-                  <span className="text-2xl font-bold text-primary-600">
-                    {formatPrice(flight.price.total, flight.price.currency)}
-                  </span>
+                <div className="space-y-2">
+                  {returnFlight && (
+                    <>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Tiket Pergi</span>
+                        <span className="font-semibold text-gray-700">
+                          {formatPrice(
+                            flight.price.total,
+                            flight.price.currency
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Tiket Pulang</span>
+                        <span className="font-semibold text-gray-700">
+                          {formatPrice(
+                            returnFlight.price.total,
+                            returnFlight.price.currency
+                          )}
+                        </span>
+                      </div>
+                      <div className="border-t-2 border-primary-300 pt-2"></div>
+                    </>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700 font-semibold">
+                      Total Pembayaran
+                    </span>
+                    <span className="text-2xl font-bold text-primary-600">
+                      {formatPrice(
+                        (
+                          parseFloat(flight.price.total) +
+                          (returnFlight
+                            ? parseFloat(returnFlight.price.total)
+                            : 0)
+                        ).toFixed(2),
+                        flight.price.currency
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
 
