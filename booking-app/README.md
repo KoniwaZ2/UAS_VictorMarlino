@@ -1,70 +1,217 @@
-# Getting Started with Create React App
+# ✈️ Flight Booking Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplikasi web modern untuk booking tiket pesawat yang terintegrasi dengan **Amadeus API**. Dibangun menggunakan React dengan Tailwind CSS untuk tampilan yang responsif dan menarik.
 
-## Available Scripts
+## 🎯 Fitur Utama
 
-In the project directory, you can run:
+- 🔍 **Pencarian Penerbangan**: Cari penerbangan berdasarkan kota asal, tujuan, dan tanggal
+- 🔄 **One-Way & Round Trip**: Mendukung pencarian untuk sekali jalan dan pulang pergi
+- ✨ **Real-time Results**: Hasil pencarian real-time dari Amadeus API
+- 📋 **Detail Lengkap**: Informasi lengkap maskapai, jadwal, durasi, dan harga
+- 🎫 **Booking System**: Sistem booking dengan form input data penumpang
+- 📱 **Responsive Design**: Tampilan optimal di semua perangkat (mobile, tablet, desktop)
+- 🎨 **Modern UI/UX**: Animasi smooth dan desain yang user-friendly
+- 🔒 **Validasi Form**: Validasi data penumpang dan nomor paspor
 
-### `npm start`
+## 🚀 Teknologi
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **React 19** - Library JavaScript untuk UI
+- **React Router DOM** - Routing aplikasi
+- **Tailwind CSS** - Styling modern dan responsif
+- **Axios** - HTTP client untuk API calls
+- **Amadeus API** - Real-time flight data
+- **date-fns** - Utility untuk format tanggal
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📋 Prasyarat
 
-### `npm test`
+- Node.js (versi 14 atau lebih baru)
+- npm atau yarn
+- Akun Amadeus API (gratis di [developers.amadeus.com](https://developers.amadeus.com/))
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🛠️ Instalasi
 
-### `npm run build`
+### 1. Clone atau Download Project
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cd booking-app
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Install Dependencies
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm install
+```
 
-### `npm run eject`
+### 3. Konfigurasi Amadeus API
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Daftar di [Amadeus for Developers](https://developers.amadeus.com/)
+2. Buat aplikasi baru untuk mendapatkan **Client ID** dan **Client Secret**
+3. Copy file `.env.example` menjadi `.env`:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+cp .env.example .env
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+4. Edit file `.env` dan isi dengan credentials Anda:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```env
+REACT_APP_AMADEUS_CLIENT_ID=your_client_id_here
+REACT_APP_AMADEUS_CLIENT_SECRET=your_client_secret_here
+REACT_APP_AMADEUS_BASE_URL=https://test.api.amadeus.com/v2
+```
 
-## Learn More
+### 4. Jalankan Aplikasi
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
 
-### Code Splitting
+## 📱 Halaman Aplikasi
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 1. Search Flight (`/`)
 
-### Analyzing the Bundle Size
+Halaman pencarian dengan fitur:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Pilih tipe perjalanan (sekali jalan / pulang pergi)
+- Input kota asal dan tujuan dengan autocomplete
+- Pilih tanggal keberangkatan (dan kepulangan untuk round trip)
+- Pilih jumlah penumpang
 
-### Making a Progressive Web App
+### 2. Flight Results (`/results`)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Halaman hasil pencarian dengan fitur:
 
-### Advanced Configuration
+- Daftar penerbangan yang tersedia
+- Filter berdasarkan jumlah transit
+- Sorting berdasarkan harga, durasi, atau waktu keberangkatan
+- Informasi detail maskapai, jadwal, dan harga
+- Klik untuk memilih penerbangan
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 3. Flight Booking (`/booking`)
 
-### Deployment
+Halaman booking dengan fitur:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Form input data penumpang (nama, nomor paspor, tanggal lahir, jenis kelamin)
+- Validasi nomor paspor
+- Ringkasan penerbangan
+- Konfirmasi booking dengan kode referensi
 
-### `npm run build` fails to minify
+## 🎨 Fitur Desain
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Gradient Background**: Background gradien yang smooth
+- **Card Hover Effects**: Efek hover dengan shadow dan transform
+- **Smooth Animations**: Animasi fade-in, slide-up, dan scale-in
+- **Loading States**: Animasi loading yang menarik
+- **Responsive Layout**: Grid dan flexbox untuk semua ukuran layar
+- **Custom Colors**: Pallet warna primary yang konsisten
+- **Typography**: Hierarki font yang jelas
+
+## 🔧 Struktur Project
+
+```
+booking-app/
+├── public/
+├── src/
+│   ├── components/        # Komponen reusable
+│   │   └── LoadingSpinner.js
+│   ├── pages/            # Halaman utama
+│   │   ├── SearchFlight.js
+│   │   ├── FlightResults.js
+│   │   └── FlightBooking.js
+│   ├── services/         # API services
+│   │   └── amadeusService.js
+│   ├── utils/            # Helper functions
+│   │   └── helpers.js
+│   ├── App.js           # Main app with routing
+│   ├── App.css
+│   ├── index.js
+│   └── index.css        # Tailwind imports
+├── tailwind.config.js    # Tailwind configuration
+├── postcss.config.js
+├── .env.example
+├── package.json
+└── README.md
+```
+
+## 🌐 API Endpoints yang Digunakan
+
+1. **OAuth Token**: `/v1/security/oauth2/token`
+2. **Flight Search**: `/v2/shopping/flight-offers`
+3. **Location Search**: `/v2/reference-data/locations`
+4. **Flight Pricing**: `/v2/shopping/flight-offers/pricing`
+5. **Flight Booking**: `/v2/booking/flight-orders`
+
+## ⚙️ Konfigurasi Tailwind
+
+File `tailwind.config.js` sudah dikonfigurasi dengan:
+
+- Custom color palette (primary blue)
+- Custom animations (fade-in, slide-up, scale-in)
+- Custom keyframes
+- Component classes (btn-primary, btn-secondary, input-field, card)
+
+## 📝 Catatan Penting
+
+1. **Test Mode**: Gunakan `https://test.api.amadeus.com` untuk development
+2. **Production Mode**: Ganti dengan `https://api.amadeus.com` untuk production
+3. **Rate Limiting**: API test memiliki rate limit, gunakan bijak saat development
+4. **IATA Codes**: Gunakan kode IATA 3 huruf untuk kota (contoh: JKT, DPS, CGK)
+5. **Date Format**: Format tanggal harus YYYY-MM-DD
+6. **Passport**: Nomor paspor harus 6-9 karakter alfanumerik
+
+## 🎯 Cara Penggunaan
+
+1. **Buka aplikasi** di browser
+2. **Pilih tipe perjalanan** (One Way atau Round Trip)
+3. **Masukkan kota asal** - ketik minimal 2 karakter untuk autocomplete
+4. **Masukkan kota tujuan** - pilih dari suggestions
+5. **Pilih tanggal** keberangkatan (dan kepulangan jika round trip)
+6. **Klik "Cari Penerbangan"**
+7. **Pilih penerbangan** dari hasil pencarian
+8. **Lengkapi data penumpang** dengan benar
+9. **Konfirmasi booking** untuk mendapatkan kode booking
+
+## 🐛 Troubleshooting
+
+### Error: "Failed to get access token"
+
+- Pastikan Client ID dan Client Secret sudah benar
+- Cek koneksi internet
+- Pastikan menggunakan test.api.amadeus.com untuk development
+
+### Error: "No flights found"
+
+- Pastikan kode IATA kota benar (3 huruf)
+- Cek tanggal sudah valid (tidak di masa lalu)
+- Coba rute yang lebih populer
+
+### Tampilan tidak ada styling
+
+- Pastikan Tailwind sudah terinstall: `npm list tailwindcss`
+- Restart development server: `npm start`
+
+## 📦 Build untuk Production
+
+```bash
+npm run build
+```
+
+Hasil build akan ada di folder `build/` dan siap untuk di-deploy.
+
+## 🤝 Kontribusi
+
+Aplikasi ini dibuat untuk tugas UAS. Untuk improvement atau bug fixes, silakan hubungi developer.
+
+## 📄 License
+
+MIT License - Bebas digunakan untuk keperluan pembelajaran.
+
+## 👨‍💻 Developer
+
+Dibuat dengan ❤️ menggunakan React dan Tailwind CSS
+
+---
+
+**Happy Coding! ✈️**
