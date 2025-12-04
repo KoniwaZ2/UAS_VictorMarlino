@@ -7,7 +7,6 @@ import {
   formatPrice,
   getAirlineLogo,
 } from "../utils/helpers";
-import amadeusService from "../services/amadeusService";
 
 const FlightBooking = () => {
   const location = useLocation();
@@ -110,6 +109,47 @@ const FlightBooking = () => {
       }
     }
 
+    // Check for duplicate passengers
+    for (let i = 0; i < passengers.length; i++) {
+      for (let j = i + 1; j < passengers.length; j++) {
+        const p1 = passengers[i];
+        const p2 = passengers[j];
+
+        // Check if passport numbers are the same
+        if (
+          p1.passportNumber &&
+          p2.passportNumber &&
+          p1.passportNumber === p2.passportNumber
+        ) {
+          setError(
+            `Penumpang ${i + 1} dan Penumpang ${
+              j + 1
+            } tidak boleh memiliki nomor paspor yang sama`
+          );
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return false;
+        }
+
+        // Check if name and DOB are the same (to prevent same person with different passport typo)
+        if (
+          p1.firstName &&
+          p1.lastName &&
+          p1.dateOfBirth &&
+          p1.firstName === p2.firstName &&
+          p1.lastName === p2.lastName &&
+          p1.dateOfBirth === p2.dateOfBirth
+        ) {
+          setError(
+            `Data Penumpang ${i + 1} dan Penumpang ${
+              j + 1
+            } terlihat identik (Nama dan Tanggal Lahir sama)`
+          );
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return false;
+        }
+      }
+    }
+
     return true;
   };
 
@@ -124,46 +164,14 @@ const FlightBooking = () => {
     setLoading(true);
 
     try {
-      const bookingData = {
-        data: {
-          type: "flight-order",
-          flightOffers: [flight],
-          travelers: passengers.map((passenger, index) => ({
-            id: (index + 1).toString(),
-            dateOfBirth: passenger.dateOfBirth,
-            name: {
-              firstName: passenger.firstName,
-              lastName: passenger.lastName,
-            },
-            gender: passenger.gender,
-            contact: {
-              emailAddress: contactInfo.email,
-              phones: [
-                {
-                  deviceType: "MOBILE",
-                  countryCallingCode: "62",
-                  number: contactInfo.phone.replace(/^0/, ""),
-                },
-              ],
-            },
-            documents: [
-              {
-                documentType: "PASSPORT",
-                number: passenger.passportNumber.toUpperCase(),
-                expiryDate: "2030-12-31",
-                issuanceCountry: "ID",
-                nationality: "ID",
-                holder: true,
-              },
-            ],
-          })),
-        },
-      };
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Call Amadeus API to create booking
-      const result = await amadeusService.createBooking(bookingData);
+      // Generate mock booking reference
+      const mockBookingRef =
+        "MOCK-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
-      setBookingReference(result.data?.id || "CONFIRMED");
+      setBookingReference(mockBookingRef);
       setSuccess(true);
 
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -187,149 +195,81 @@ const FlightBooking = () => {
     return dictionaries?.carriers?.[code] || code;
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
-        <div className="card max-w-2xl w-full p-8 text-center animate-scale-in">
-          <div className="text-6xl mb-6 animate-bounce">✅</div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            Booking Berhasil!
-          </h1>
-          <p className="text-xl text-gray-600 mb-6">
-            Terima kasih telah memesan dengan kami
-          </p>
-
-          <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6">
-            <div className="text-sm text-gray-600 mb-2">Kode Booking Anda:</div>
-            <div className="text-3xl font-bold text-green-600 tracking-wider">
-              {bookingReference}
-            </div>
-          </div>
-
-          <div className="bg-blue-50 rounded-lg p-6 mb-6 text-left">
-            <h3 className="font-bold text-gray-800 mb-3">
-              Detail Penerbangan:
-            </h3>
-            <div className="space-y-2 text-gray-700">
-              <p>
-                <span className="font-semibold">Maskapai:</span>{" "}
-                {getAirlineName(carrierCode)}
-              </p>
-              <p>
-                <span className="font-semibold">Rute:</span>{" "}
-                {firstSegment.departure.iataCode} →{" "}
-                {lastSegment.arrival.iataCode}
-              </p>
-              <p>
-                <span className="font-semibold">Tanggal:</span>{" "}
-                {formatDate(firstSegment.departure.at)}
-              </p>
-              <p>
-                <span className="font-semibold">Waktu:</span>{" "}
-                {formatTime(firstSegment.departure.at)} -{" "}
-                {formatTime(lastSegment.arrival.at)}
-              </p>
-              <p>
-                <span className="font-semibold">Total:</span>{" "}
-                {formatPrice(flight.price.total, flight.price.currency)}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 text-left">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Catatan:</span> Email konfirmasi
-              telah dikirim ke{" "}
-              <span className="font-semibold">{contactInfo.email}</span>. Simpan
-              kode booking Anda untuk check-in.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={() => navigate("/")}
-              className="btn-primary flex-1"
-            >
-              Cari Penerbangan Lain
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="btn-secondary flex-1"
-            >
-              Cetak Konfirmasi
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Success state is now handled by the modal overlay below
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-8 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-white hover:text-blue-100 mb-4 transition-colors duration-300"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div className="container mx-auto max-w-6xl px-4 py-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Kembali
-          </button>
-
-          <h1 className="text-3xl font-bold mb-2">Lengkapi Data Penumpang</h1>
-          <p className="text-blue-100">
-            Pastikan data sesuai dengan dokumen perjalanan Anda
-          </p>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">
+                Lengkapi Data Pemesanan
+              </h1>
+              <p className="text-sm text-slate-500">
+                Isi data penumpang sesuai identitas resmi
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Form */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Error Message */}
               {error && (
-                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg animate-slide-down">
-                  <div className="flex items-center">
-                    <svg
-                      className="w-5 h-5 mr-2 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="font-semibold">{error}</span>
-                  </div>
+                <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl flex items-center gap-3 animate-fade-in">
+                  <svg
+                    className="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="font-medium">{error}</span>
                 </div>
               )}
 
               {/* Contact Information */}
-              <div className="card p-6 animate-slide-up">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  📧 Informasi Kontak
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-sm">
+                    1
+                  </span>
+                  Data Pemesan
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email *
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Email
                     </label>
                     <input
                       type="email"
@@ -341,10 +281,13 @@ const FlightBooking = () => {
                       className="input-field"
                       required
                     />
+                    <p className="text-xs text-slate-400 mt-1">
+                      E-tiket akan dikirim ke sini
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Nomor Telepon *
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Nomor Telepon
                     </label>
                     <input
                       type="tel"
@@ -356,6 +299,9 @@ const FlightBooking = () => {
                       className="input-field"
                       required
                     />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Untuk notifikasi penting
+                    </p>
                   </div>
                 </div>
               </div>
@@ -364,18 +310,20 @@ const FlightBooking = () => {
               {passengers.map((passenger, index) => (
                 <div
                   key={index}
-                  className="card p-6 animate-slide-up"
-                  style={{ animationDelay: `${(index + 1) * 0.1}s` }}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
                 >
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">
-                    👤 Data Penumpang {index + 1}
+                  <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-sm">
+                      {index + 2}
+                    </span>
+                    Penumpang {index + 1}
                   </h2>
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Nama Depan *
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                          Nama Depan
                         </label>
                         <input
                           type="text"
@@ -391,13 +339,10 @@ const FlightBooking = () => {
                           className="input-field uppercase"
                           required
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Sesuai paspor/KTP
-                        </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Nama Belakang *
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                          Nama Belakang
                         </label>
                         <input
                           type="text"
@@ -413,16 +358,13 @@ const FlightBooking = () => {
                           className="input-field uppercase"
                           required
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Sesuai paspor/KTP
-                        </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Nomor Paspor *
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                          Nomor Paspor
                         </label>
                         <input
                           type="text"
@@ -439,13 +381,10 @@ const FlightBooking = () => {
                           maxLength="9"
                           required
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          6-9 karakter alfanumerik
-                        </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Tanggal Lahir *
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                          Tanggal Lahir
                         </label>
                         <input
                           type="date"
@@ -465,11 +404,11 @@ const FlightBooking = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Jenis Kelamin *
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Jenis Kelamin
                       </label>
                       <div className="flex gap-4">
-                        <label className="flex items-center cursor-pointer">
+                        <label className="flex items-center cursor-pointer group p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex-1">
                           <input
                             type="radio"
                             name={`gender-${index}`}
@@ -482,11 +421,13 @@ const FlightBooking = () => {
                                 e.target.value
                               )
                             }
-                            className="mr-2 w-4 h-4 text-primary-600"
+                            className="mr-3 w-4 h-4 text-primary-600"
                           />
-                          <span>Laki-laki</span>
+                          <span className="font-medium text-slate-700">
+                            Laki-laki
+                          </span>
                         </label>
-                        <label className="flex items-center cursor-pointer">
+                        <label className="flex items-center cursor-pointer group p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex-1">
                           <input
                             type="radio"
                             name={`gender-${index}`}
@@ -499,9 +440,11 @@ const FlightBooking = () => {
                                 e.target.value
                               )
                             }
-                            className="mr-2 w-4 h-4 text-primary-600"
+                            className="mr-3 w-4 h-4 text-primary-600"
                           />
-                          <span>Perempuan</span>
+                          <span className="font-medium text-slate-700">
+                            Perempuan
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -510,18 +453,18 @@ const FlightBooking = () => {
               ))}
 
               {/* Terms and Submit */}
-              <div className="card p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <label className="flex items-start cursor-pointer group">
                   <input
                     type="checkbox"
                     required
-                    className="mt-1 mr-3 w-5 h-5 text-primary-600"
+                    className="mt-1 mr-3 w-5 h-5 text-primary-600 rounded border-slate-300 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                  <span className="text-sm text-slate-600 group-hover:text-slate-900">
                     Saya telah membaca dan menyetujui{" "}
                     <button
                       type="button"
-                      className="text-primary-600 hover:underline"
+                      className="text-primary-600 hover:underline font-medium"
                     >
                       syarat dan ketentuan
                     </button>{" "}
@@ -533,14 +476,12 @@ const FlightBooking = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full btn-primary py-4 text-lg ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className="w-full btn-primary py-4 text-lg shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40"
               >
                 {loading ? (
-                  <span className="flex items-center justify-center">
+                  <>
                     <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      className="animate-spin h-5 w-5 text-white"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -558,12 +499,12 @@ const FlightBooking = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Memproses Booking...
-                  </span>
+                    <span>Memproses Booking...</span>
+                  </>
                 ) : (
-                  <span className="flex items-center justify-center">
+                  <>
                     <svg
-                      className="w-6 h-6 mr-2"
+                      className="w-5 h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -575,8 +516,8 @@ const FlightBooking = () => {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Konfirmasi Booking
-                  </span>
+                    <span>Lanjut Pembayaran</span>
+                  </>
                 )}
               </button>
             </form>
@@ -584,77 +525,90 @@ const FlightBooking = () => {
 
           {/* Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="card p-6 sticky top-4 animate-slide-up">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Ringkasan Penerbangan
+            <div className="bg-white rounded-2xl p-6 sticky top-24 shadow-sm border border-slate-100">
+              <h2 className="text-lg font-bold text-slate-800 mb-6">
+                Ringkasan
               </h2>
 
               {/* Departure Flight */}
               <div className="mb-6">
-                <div className="bg-primary-50 px-3 py-2 rounded-t-lg border-b-2 border-primary-200">
-                  <h3 className="font-bold text-primary-700">
-                    ✈️ Penerbangan Pergi
-                  </h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-1 bg-primary-50 text-primary-700 text-xs font-bold rounded uppercase">
+                    Pergi
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {formatDate(firstSegment.departure.at)}
+                  </span>
                 </div>
-                <div className="p-3 border-l-2 border-r-2 border-b-2 border-gray-200 rounded-b-lg">
-                  <div className="flex items-center gap-3 mb-4">
-                    <img
-                      src={getAirlineLogo(carrierCode)}
-                      alt={carrierCode}
-                      className="w-12 h-12 object-contain"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/48x48?text=" +
-                          carrierCode;
-                      }}
-                    />
-                    <div>
-                      <div className="font-bold text-gray-800">
-                        {getAirlineName(carrierCode)}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {carrierCode} {firstSegment.number}
-                      </div>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <img
+                    src={getAirlineLogo(carrierCode)}
+                    alt={carrierCode}
+                    className="w-8 h-8 object-contain"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/48x48?text=" + carrierCode;
+                    }}
+                  />
+                  <div>
+                    <div className="font-bold text-slate-800 text-sm">
+                      {getAirlineName(carrierCode)}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {carrierCode} {firstSegment.number}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative pl-4 border-l-2 border-slate-100 space-y-4">
+                  <div className="relative">
+                    <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white bg-slate-300"></div>
+                    <div className="text-sm font-bold text-slate-800">
+                      {formatTime(firstSegment.departure.at)}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {firstSegment.departure.iataCode}
                     </div>
                   </div>
 
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Keberangkatan</span>
-                      <span className="font-semibold text-gray-800">
-                        {firstSegment.departure.iataCode}
+                  <div className="relative py-1">
+                    <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                      <span>{formatDuration(itinerary.duration)}</span>
+                      <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span>
+                        {itinerary.segments.length - 1 === 0
+                          ? "Langsung"
+                          : `${itinerary.segments.length - 1} Transit`}
                       </span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Tujuan</span>
-                      <span className="font-semibold text-gray-800">
-                        {lastSegment.arrival.iataCode}
-                      </span>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white bg-slate-800"></div>
+                    <div className="text-sm font-bold text-slate-800">
+                      {formatTime(lastSegment.arrival.at)}
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Tanggal</span>
-                      <span className="font-semibold text-gray-800">
-                        {formatDate(firstSegment.departure.at)}
-                      </span>
+                    <div className="text-xs text-slate-500">
+                      {lastSegment.arrival.iataCode}
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Waktu</span>
-                      <span className="font-semibold text-gray-800">
-                        {formatTime(firstSegment.departure.at)} -{" "}
-                        {formatTime(lastSegment.arrival.at)}
-                      </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-end">
+                  <div className="text-xs text-slate-500">
+                    <div>Harga per orang:</div>
+                    <div className="font-medium text-slate-700">
+                      {formatPrice(
+                        parseFloat(flight.price.total) / passengers.length,
+                        flight.price.currency
+                      )}
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Durasi</span>
-                      <span className="font-semibold text-gray-800">
-                        {formatDuration(itinerary.duration)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Stops</span>
-                      <span className="font-semibold text-gray-800">
-                        {itinerary.segments.length - 1}
-                      </span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-500">Total:</div>
+                    <div className="font-bold text-primary-600">
+                      {formatPrice(flight.price.total, flight.price.currency)}
                     </div>
                   </div>
                 </div>
@@ -672,71 +626,93 @@ const FlightBooking = () => {
                   const returnCarrierCode = returnFirstSegment.carrierCode;
 
                   return (
-                    <div className="mb-6">
-                      <div className="bg-green-50 px-3 py-2 rounded-t-lg border-b-2 border-green-200">
-                        <h3 className="font-bold text-green-700">
-                          🔄 Penerbangan Pulang
-                        </h3>
+                    <div className="mb-6 pt-6 border-t border-slate-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded uppercase">
+                          Pulang
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {formatDate(returnFirstSegment.departure.at)}
+                        </span>
                       </div>
-                      <div className="p-3 border-l-2 border-r-2 border-b-2 border-gray-200 rounded-b-lg">
-                        <div className="flex items-center gap-3 mb-4">
-                          <img
-                            src={getAirlineLogo(returnCarrierCode)}
-                            alt={returnCarrierCode}
-                            className="w-12 h-12 object-contain"
-                            onError={(e) => {
-                              e.target.src =
-                                "https://via.placeholder.com/48x48?text=" +
-                                returnCarrierCode;
-                            }}
-                          />
-                          <div>
-                            <div className="font-bold text-gray-800">
-                              {getAirlineName(returnCarrierCode)}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {returnCarrierCode} {returnFirstSegment.number}
-                            </div>
+
+                      <div className="flex items-center gap-3 mb-4">
+                        <img
+                          src={getAirlineLogo(returnCarrierCode)}
+                          alt={returnCarrierCode}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/48x48?text=" +
+                              returnCarrierCode;
+                          }}
+                        />
+                        <div>
+                          <div className="font-bold text-slate-800 text-sm">
+                            {getAirlineName(returnCarrierCode)}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {returnCarrierCode} {returnFirstSegment.number}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="relative pl-4 border-l-2 border-slate-100 space-y-4">
+                        <div className="relative">
+                          <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white bg-slate-300"></div>
+                          <div className="text-sm font-bold text-slate-800">
+                            {formatTime(returnFirstSegment.departure.at)}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {returnFirstSegment.departure.iataCode}
                           </div>
                         </div>
 
-                        <div className="space-y-3 text-sm">
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Keberangkatan</span>
-                            <span className="font-semibold text-gray-800">
-                              {returnFirstSegment.departure.iataCode}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Tujuan</span>
-                            <span className="font-semibold text-gray-800">
-                              {returnLastSegment.arrival.iataCode}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Tanggal</span>
-                            <span className="font-semibold text-gray-800">
-                              {formatDate(returnFirstSegment.departure.at)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Waktu</span>
-                            <span className="font-semibold text-gray-800">
-                              {formatTime(returnFirstSegment.departure.at)} -{" "}
-                              {formatTime(returnLastSegment.arrival.at)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Durasi</span>
-                            <span className="font-semibold text-gray-800">
+                        <div className="relative py-1">
+                          <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                            <span>
                               {formatDuration(returnItinerary.duration)}
                             </span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
-                            <span className="text-gray-600">Stops</span>
-                            <span className="font-semibold text-gray-800">
-                              {returnItinerary.segments.length - 1}
+                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span>
+                              {returnItinerary.segments.length - 1 === 0
+                                ? "Langsung"
+                                : `${
+                                    returnItinerary.segments.length - 1
+                                  } Transit`}
                             </span>
+                          </div>
+                        </div>
+
+                        <div className="relative">
+                          <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white bg-slate-800"></div>
+                          <div className="text-sm font-bold text-slate-800">
+                            {formatTime(returnLastSegment.arrival.at)}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {returnLastSegment.arrival.iataCode}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-end">
+                        <div className="text-xs text-slate-500">
+                          <div>Harga per orang:</div>
+                          <div className="font-medium text-slate-700">
+                            {formatPrice(
+                              parseFloat(returnFlight.price.total) /
+                                passengers.length,
+                              returnFlight.price.currency
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-slate-500">Total:</div>
+                          <div className="font-bold text-primary-600">
+                            {formatPrice(
+                              returnFlight.price.total,
+                              returnFlight.price.currency
+                            )}
                           </div>
                         </div>
                       </div>
@@ -744,145 +720,106 @@ const FlightBooking = () => {
                   );
                 })()}
 
-              {/* Passenger Count */}
-              <div className="mb-6 p-3 border-2 border-gray-200 rounded-lg">
-                <div className="flex justify-between py-2">
-                  <span className="text-gray-600 font-semibold">
-                    👥 Jumlah Penumpang
-                  </span>
-                  <span className="font-bold text-gray-800">
+              {/* Price Breakdown */}
+              <div className="bg-slate-50 rounded-xl p-4 mt-6">
+                <div className="flex justify-between items-center mb-2 text-sm">
+                  <span className="text-slate-600">Total Penumpang</span>
+                  <span className="font-semibold text-slate-800">
                     {passengers.length} Orang
                   </span>
                 </div>
-              </div>
-
-              {/* Price Breakdown */}
-              <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-lg p-5 border-2 border-primary-200 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-4 text-lg">
-                  💰 Rincian Harga
-                </h3>
-
-                <div className="space-y-3">
-                  {/* Departure Flight Price */}
-                  <div className="bg-white rounded-lg p-3 shadow-sm">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-semibold text-gray-700">
-                        ✈️ Tiket Pergi
-                      </span>
-                      <span className="text-sm font-bold text-primary-600">
-                        {formatPrice(flight.price.total, flight.price.currency)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-gray-500">
-                      <span>Per orang</span>
-                      <span>
-                        {formatPrice(
-                          (
-                            parseFloat(flight.price.total) / passengers.length
-                          ).toFixed(2),
-                          flight.price.currency
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Return Flight Price */}
-                  {returnFlight && (
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-semibold text-gray-700">
-                          🔄 Tiket Pulang
-                        </span>
-                        <span className="text-sm font-bold text-green-600">
-                          {formatPrice(
-                            returnFlight.price.total,
-                            returnFlight.price.currency
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs text-gray-500">
-                        <span>Per orang</span>
-                        <span>
-                          {formatPrice(
-                            (
-                              parseFloat(returnFlight.price.total) /
-                              passengers.length
-                            ).toFixed(2),
-                            returnFlight.price.currency
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Subtotal per Person */}
-                  <div className="border-t-2 border-gray-200 pt-3">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-semibold text-gray-700">
-                        Harga per Orang
-                      </span>
-                      <span className="text-sm font-bold text-gray-800">
-                        {formatPrice(
-                          (
-                            (parseFloat(flight.price.total) +
-                              (returnFlight
-                                ? parseFloat(returnFlight.price.total)
-                                : 0)) /
-                            passengers.length
-                          ).toFixed(2),
-                          flight.price.currency
-                        )}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500 text-right">
-                      × {passengers.length} penumpang
-                    </div>
-                  </div>
-
-                  {/* Total */}
-                  <div className="bg-primary-600 text-white rounded-lg p-4 shadow-lg">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-xs opacity-90 mb-1">
-                          Total Pembayaran
-                        </div>
-                        <div className="text-2xl font-bold">
-                          {formatPrice(
-                            (
-                              parseFloat(flight.price.total) +
-                              (returnFlight
-                                ? parseFloat(returnFlight.price.total)
-                                : 0)
-                            ).toFixed(2),
-                            flight.price.currency
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs opacity-90">Untuk</div>
-                        <div className="text-lg font-bold">
-                          {passengers.length} Orang
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="border-t border-slate-200 my-3"></div>
+                <div className="flex justify-between items-end mb-1">
+                  <span className="text-sm font-bold text-slate-800">
+                    Total Bayar
+                  </span>
+                  <span className="text-xl font-bold text-primary-600">
+                    {formatPrice(
+                      (
+                        parseFloat(flight.price.total) +
+                        (returnFlight
+                          ? parseFloat(returnFlight.price.total)
+                          : 0)
+                      ).toFixed(2),
+                      flight.price.currency
+                    )}
+                  </span>
                 </div>
-              </div>
-
-              <div className="mt-4 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                <p className="mb-2">
-                  💡 <span className="font-semibold">Tips:</span>
-                </p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Pastikan data sesuai dengan paspor</li>
-                  <li>Periksa kembali nomor kontak</li>
-                  <li>Simpan kode booking Anda</li>
-                </ul>
+                <div className="flex justify-end text-xs text-slate-500 font-medium">
+                  {formatPrice(
+                    (parseFloat(flight.price.total) +
+                      (returnFlight
+                        ? parseFloat(returnFlight.price.total)
+                        : 0)) /
+                      passengers.length,
+                    flight.price.currency
+                  )}
+                  /org 👤
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Success Modal */}
+      {success && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center animate-scale-in relative overflow-hidden">
+            {/* Decoration Line */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-400 via-primary-600 to-primary-400"></div>
+
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+              <svg
+                className="w-10 h-10 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-3xl font-bold text-slate-800 mb-2">
+              Booking Berhasil!
+            </h2>
+            <p className="text-slate-500 mb-8">
+              Tiket elektronik Anda telah dikirim ke{" "}
+              <span className="font-semibold text-slate-700">
+                {contactInfo.email}
+              </span>
+            </p>
+
+            <div className="bg-slate-50 rounded-xl p-4 mb-8 border border-slate-100">
+              <div className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">
+                Kode Booking
+              </div>
+              <div className="text-3xl font-mono font-bold text-primary-600 tracking-widest">
+                {bookingReference}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate("/")}
+                className="w-full btn-primary py-4 text-lg shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:-translate-y-1 transition-all"
+              >
+                Kembali ke Search Flight
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="w-full py-4 text-slate-500 font-bold hover:text-slate-700 transition-colors"
+              >
+                Cetak Bukti Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
