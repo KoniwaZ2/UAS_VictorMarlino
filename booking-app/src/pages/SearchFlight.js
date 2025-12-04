@@ -47,16 +47,13 @@ const SearchFlight = () => {
   const handleOriginSearch = (value) => {
     setFormData((prev) => ({ ...prev, origin: value }));
 
-    // Clear previous timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
 
     if (value.length >= 2) {
-      // Set new timeout for debouncing
       const timeout = setTimeout(async () => {
         try {
-          // Try to get results from Amadeus API
           let amadeusResults = [];
           try {
             amadeusResults = await amadeusService.searchLocations(value);
@@ -66,8 +63,6 @@ const SearchFlight = () => {
           } catch (apiError) {
             console.warn("Amadeus API error, using local database:", apiError);
           }
-
-          // Combine with local database
           const combinedResults = searchLocationsWithFallback(
             value,
             amadeusResults
@@ -82,7 +77,6 @@ const SearchFlight = () => {
           }
         } catch (error) {
           console.error("Error searching origin:", error);
-          // Even on error, try to show local results
           const localResults = searchLocationsWithFallback(value, []);
           if (localResults.length > 0) {
             setOriginSuggestions(localResults);
@@ -92,7 +86,7 @@ const SearchFlight = () => {
             setShowOriginSuggestions(false);
           }
         }
-      }, 300); // Wait 300ms after user stops typing
+      }, 300);
 
       setSearchTimeout(timeout);
     } else {
@@ -104,16 +98,13 @@ const SearchFlight = () => {
   const handleDestinationSearch = (value) => {
     setFormData((prev) => ({ ...prev, destination: value }));
 
-    // Clear previous timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
 
     if (value.length >= 2) {
-      // Set new timeout for debouncing
       const timeout = setTimeout(async () => {
         try {
-          // Try to get results from Amadeus API
           let amadeusResults = [];
           try {
             amadeusResults = await amadeusService.searchLocations(value);
@@ -124,7 +115,6 @@ const SearchFlight = () => {
             console.warn("Amadeus API error, using local database:", apiError);
           }
 
-          // Combine with local database
           const combinedResults = searchLocationsWithFallback(
             value,
             amadeusResults
@@ -139,7 +129,6 @@ const SearchFlight = () => {
           }
         } catch (error) {
           console.error("Error searching destination:", error);
-          // Even on error, try to show local results
           const localResults = searchLocationsWithFallback(value, []);
           if (localResults.length > 0) {
             setDestinationSuggestions(localResults);
@@ -149,7 +138,7 @@ const SearchFlight = () => {
             setShowDestinationSuggestions(false);
           }
         }
-      }, 300); // Wait 300ms after user stops typing
+      }, 300);
 
       setSearchTimeout(timeout);
     } else {
@@ -190,7 +179,6 @@ const SearchFlight = () => {
     setLoading(true);
 
     try {
-      // Search for departure flights
       const departureParams = {
         origin: formData.origin,
         destination: formData.destination,
@@ -202,11 +190,10 @@ const SearchFlight = () => {
         departureParams
       );
 
-      // If round trip, also search for return flights
       let returnResults = null;
       if (formData.tripType === "roundTrip" && formData.returnDate) {
         const returnParams = {
-          origin: formData.destination, // Swap origin and destination
+          origin: formData.destination,
           destination: formData.origin,
           departureDate: formData.returnDate,
           adults: formData.adults,
