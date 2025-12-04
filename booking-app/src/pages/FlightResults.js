@@ -31,7 +31,6 @@ const FlightResults = () => {
     if (!flights || flights.length === 0) {
     } else {
       setSortedFlights(flights);
-      // Check if we're showing return flights
       if (selectedDepartureFlight && returnFlights.length > 0) {
         setIsSelectingReturn(true);
         setDepartureFlight(selectedDepartureFlight);
@@ -70,9 +69,7 @@ const FlightResults = () => {
   }, [flights, sortBy, selectedStops]);
 
   const handleFlightSelect = (flight) => {
-    // If round trip and selecting departure flight
     if (searchParams?.tripType === "roundTrip" && !isSelectingReturn) {
-      // Show return flights
       setDepartureFlight(flight);
       setIsSelectingReturn(true);
       setSortedFlights(returnFlights);
@@ -260,7 +257,6 @@ const FlightResults = () => {
           <button
             onClick={() => {
               if (isSelectingReturn) {
-                // Go back to departure flights
                 setIsSelectingReturn(false);
                 setDepartureFlight(null);
                 setSortedFlights(flights);

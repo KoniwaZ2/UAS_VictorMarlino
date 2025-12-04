@@ -650,6 +650,12 @@ const FlightBooking = () => {
                         {formatDuration(itinerary.duration)}
                       </span>
                     </div>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Stops</span>
+                      <span className="font-semibold text-gray-800">
+                        {itinerary.segments.length - 1}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -724,6 +730,12 @@ const FlightBooking = () => {
                             <span className="text-gray-600">Durasi</span>
                             <span className="font-semibold text-gray-800">
                               {formatDuration(returnItinerary.duration)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-200">
+                            <span className="text-gray-600">Stops</span>
+                            <span className="font-semibold text-gray-800">
+                              {returnItinerary.segments.length - 1}
                             </span>
                           </div>
                         </div>
