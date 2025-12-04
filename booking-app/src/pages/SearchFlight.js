@@ -235,64 +235,129 @@ const SearchFlight = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* Navbar Placeholder (Optional, for visual balance) */}
+    <div className="min-h-screen bg-slate-50">
+      {/* Navbar */}
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-4" : "py-6"
+          scrolled ? "bg-white/95 backdrop-blur-lg shadow-lg py-3" : "bg-transparent py-5"
         }`}
       >
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <div
-            className={`font-bold text-2xl ${
-              scrolled ? "text-primary-600" : "text-white"
-            }`}
-          >
-            FlyNow
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+              scrolled ? "bg-primary-600" : "bg-white/20 backdrop-blur-sm"
+            }`}>
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M9 21V3l6 7-6 7z" />
+              </svg>
+            </div>
+            <div
+              className={`font-bold text-2xl transition-all duration-300 ${
+                scrolled ? "text-primary-600" : "text-white"
+              }`}
+            >
+              FlyHigh
+            </div>
           </div>
-          <div className={`${scrolled ? "text-slate-600" : "text-white/90"}`}>
-            <span className="text-sm font-medium">IDR</span>
+          
+          <div className="flex items-center gap-6">
+            <button className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+              scrolled 
+                ? "text-slate-700 hover:bg-slate-100" 
+                : "text-white hover:bg-white/10"
+            }`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm">IDR</span>
+            </button>
+            
+            <button className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 ${
+              scrolled 
+                ? "bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/30" 
+                : "bg-white text-primary-600 hover:bg-blue-50 shadow-lg"
+            }`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="hidden md:inline text-sm">Masuk</span>
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative bg-primary-600 text-white pt-40 pb-64 px-4 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow"></div>
-          <div className="absolute top-1/2 -left-24 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow delay-1000"></div>
-          <div className="absolute -bottom-24 right-1/4 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow delay-2000"></div>
+      <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 text-white pt-40 pb-64 px-4 overflow-hidden">
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img
+            src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&q=80"
+            alt="Airplane"
+            className="w-full h-full object-cover"
+          />
         </div>
 
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/10"></div>
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow"></div>
+          <div className="absolute top-1/2 -left-24 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow delay-1000"></div>
+          <div className="absolute -bottom-24 right-1/4 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow delay-2000"></div>
+        </div>
+
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20"></div>
+
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 animate-float">
+            <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl rotate-12 flex items-center justify-center">
+              <span className="text-4xl">✈️</span>
+            </div>
+          </div>
+          <div className="absolute top-40 right-20 animate-float-delayed">
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center">
+              <span className="text-3xl">🌍</span>
+            </div>
+          </div>
+          <div className="absolute bottom-40 left-1/4 animate-float-slow">
+            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl -rotate-12 flex items-center justify-center">
+              <span className="text-2xl">🎫</span>
+            </div>
+          </div>
+        </div>
 
         <div className="container mx-auto max-w-5xl relative z-10 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight animate-fade-in">
-            Jelajahi Dunia
+          <div className="inline-block mb-6 animate-fade-in">
+            <span className="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-sm font-semibold border border-white/30">
+              🎉 Promo Akhir Tahun - Diskon hingga 50%
+            </span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight animate-fade-in leading-tight">
+            Jelajahi Dunia<br/>
+            <span className="bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">
+              Tanpa Batas
+            </span>
           </h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto font-light animate-slide-up delay-100">
+          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto font-light animate-slide-up delay-100 leading-relaxed">
             Temukan penerbangan terbaik dengan harga termurah ke destinasi
-            impian Anda.
+            impian Anda. Cepat, mudah, dan terpercaya.
           </p>
         </div>
       </div>
 
       {/* Search Form Container */}
-      <div className="container mx-auto max-w-5xl px-4 -mt-48 relative z-20">
-        <div className="bg-white rounded-3xl shadow-2xl shadow-primary-900/10 p-6 md:p-10 backdrop-blur-sm border border-white/50 animate-slide-up delay-200">
-          <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="container mx-auto max-w-6xl px-4 -mt-48 relative z-20">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-slate-100 animate-slide-up delay-200">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Trip Type Tabs */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-slate-100 p-1.5 rounded-2xl inline-flex shadow-inner">
+            <div className="flex justify-center mb-6">
+              <div className="bg-slate-100 p-1 rounded-xl inline-flex">
                 <button
                   type="button"
                   onClick={() => handleTripTypeChange("oneWay")}
-                  className={`py-2.5 px-8 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  className={`py-2.5 px-6 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     formData.tripType === "oneWay"
-                      ? "bg-white text-primary-600 shadow-sm scale-105"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-primary-600 text-white shadow-md"
+                      : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
                   Sekali Jalan
@@ -300,10 +365,10 @@ const SearchFlight = () => {
                 <button
                   type="button"
                   onClick={() => handleTripTypeChange("roundTrip")}
-                  className={`py-2.5 px-8 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  className={`py-2.5 px-6 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     formData.tripType === "roundTrip"
-                      ? "bg-white text-primary-600 shadow-sm scale-105"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-primary-600 text-white shadow-md"
+                      : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
                   Pulang Pergi
@@ -314,7 +379,7 @@ const SearchFlight = () => {
             {/* Main Inputs Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,auto,1.5fr] gap-4 items-start">
               {/* Origin Input */}
-              <div className="relative group z-30">
+              <div className="relative group" style={{zIndex: 50}}>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">
                   Dari
                 </label>
@@ -354,7 +419,7 @@ const SearchFlight = () => {
 
                 {/* Origin Suggestions Dropdown */}
                 {showOriginSuggestions && originSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl max-h-80 overflow-y-auto animate-slide-down origin-top z-50">
+                  <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto animate-slide-down origin-top" style={{zIndex: 100}}>
                     {originSuggestions.map((location) => (
                       <div
                         key={location.id}
@@ -398,7 +463,7 @@ const SearchFlight = () => {
               </div>
 
               {/* Swap Button */}
-              <div className="flex justify-center lg:pt-8 relative z-20">
+              <div className="flex justify-center lg:pt-8 relative z-10">
                 <button
                   type="button"
                   onClick={swapLocations}
@@ -421,7 +486,7 @@ const SearchFlight = () => {
               </div>
 
               {/* Destination Input */}
-              <div className="relative group z-30">
+              <div className="relative group" style={{zIndex: 50}}>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">
                   Ke
                 </label>
@@ -471,7 +536,7 @@ const SearchFlight = () => {
                 {/* Destination Suggestions Dropdown */}
                 {showDestinationSuggestions &&
                   destinationSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl max-h-80 overflow-y-auto animate-slide-down origin-top z-50">
+                    <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto animate-slide-down origin-top" style={{zIndex: 100}}>
                       {destinationSuggestions.map((location) => (
                         <div
                           key={location.id}
@@ -693,35 +758,231 @@ const SearchFlight = () => {
               title: "Harga Terbaik",
               desc: "Jaminan harga termurah untuk setiap perjalanan Anda",
               delay: "delay-300",
+              gradient: "from-amber-400 to-orange-500",
             },
             {
               icon: "⚡",
               title: "Cepat & Mudah",
               desc: "Proses pemesanan tiket yang praktis dalam hitungan detik",
               delay: "delay-500",
+              gradient: "from-blue-400 to-cyan-500",
             },
             {
               icon: "🛡️",
               title: "Aman Terpercaya",
               desc: "Transaksi aman dengan teknologi enkripsi terkini",
               delay: "delay-700",
+              gradient: "from-green-400 to-emerald-500",
             },
           ].map((feature, idx) => (
             <div
               key={idx}
-              className={`text-center p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group animate-slide-up ${feature.delay}`}
+              className={`relative text-center p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 group animate-slide-up ${feature.delay} overflow-hidden`}
             >
-              <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300 inline-block">
-                {feature.icon}
+              <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient}`}></div>
+              <div className="relative">
+                <div className="text-6xl mb-6 transform group-hover:scale-125 group-hover:rotate-12 transition-transform duration-500 inline-block">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-slate-500 leading-relaxed">{feature.desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-slate-500 leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>
+
+        {/* Popular Destinations */}
+        <div className="mt-24 mb-12">
+          <h2 className="text-3xl font-bold text-slate-800 text-center mb-4">
+            Destinasi Populer
+          </h2>
+          <p className="text-slate-500 text-center mb-12 max-w-2xl mx-auto">
+            Jelajahi kota-kota favorit dengan penawaran terbaik
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              {
+                city: "Tokyo",
+                country: "Jepang",
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&q=80",
+                price: "Dari Rp 4.5jt",
+              },
+              {
+                city: "Paris",
+                country: "Prancis",
+                image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80",
+                price: "Dari Rp 8.2jt",
+              },
+              {
+                city: "Seoul",
+                country: "Korea Selatan",
+                image: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=400&q=80",
+                price: "Dari Rp 3.8jt",
+              },
+              {
+                city: "Dubai",
+                country: "UAE",
+                image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80",
+                price: "Dari Rp 5.9jt",
+              },
+            ].map((destination, idx) => (
+              <div
+                key={idx}
+                className="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 animate-slide-up"
+                style={{ animationDelay: `${(idx + 1) * 100}ms` }}
+              >
+                <div className="relative h-72 overflow-hidden">
+                  <img
+                    src={destination.image}
+                    alt={destination.city}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3 className="text-2xl font-bold mb-1">{destination.city}</h3>
+                    <p className="text-blue-200 text-sm mb-3">{destination.country}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                        {destination.price}
+                      </span>
+                      <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trust Badges */}
+        <div className="mt-24 mb-12 p-12 bg-gradient-to-br from-primary-50 to-blue-50 rounded-3xl border border-primary-100">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">
+              Dipercaya oleh Ribuan Traveler
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Bergabunglah dengan komunitas traveler yang sudah mempercayai kami untuk perjalanan mereka
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: "100K+", label: "Penerbangan Terjual", icon: "✈️" },
+              { number: "50K+", label: "Pelanggan Puas", icon: "😊" },
+              { number: "200+", label: "Destinasi", icon: "🌏" },
+              { number: "24/7", label: "Dukungan", icon: "💬" },
+            ].map((stat, idx) => (
+              <div
+                key={idx}
+                className="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="text-4xl mb-3">{stat.icon}</div>
+                <div className="text-3xl font-bold text-primary-600 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-sm text-slate-600 font-medium">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white mt-24">
+        <div className="container mx-auto px-6 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M9 21V3l6 7-6 7z" />
+                  </svg>
+                </div>
+                <span className="font-bold text-2xl">FlyHigh</span>
+              </div>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                Platform booking penerbangan terpercaya dengan harga terbaik untuk perjalanan Anda.
+              </p>
+              <div className="flex gap-3">
+                {['facebook', 'twitter', 'instagram', 'youtube'].map((social) => (
+                  <button
+                    key={social}
+                    className="w-10 h-10 rounded-full bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Links Columns */}
+            {[
+              {
+                title: "Perusahaan",
+                links: ["Tentang Kami", "Karir", "Berita", "Kontak"],
+              },
+              {
+                title: "Layanan",
+                links: ["Penerbangan", "Hotel", "Paket Tour", "Travel Insurance"],
+              },
+              {
+                title: "Bantuan",
+                links: ["FAQ", "Cara Pesan", "Kebijakan", "Hubungi Kami"],
+              },
+            ].map((column, idx) => (
+              <div key={idx}>
+                <h3 className="font-bold text-lg mb-4">{column.title}</h3>
+                <ul className="space-y-3">
+                  {column.links.map((link, linkIdx) => (
+                    <li key={linkIdx}>
+                      <a
+                        href="#"
+                        className="text-slate-400 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
+                      >
+                        <span className="w-0 h-0.5 bg-primary-500 group-hover:w-4 transition-all duration-300"></span>
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-slate-800 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-slate-400 text-sm">
+                © 2025 FlyHigh. All rights reserved. Made with ❤️ in Indonesia
+              </p>
+              <div className="flex gap-6 text-sm">
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  Syarat & Ketentuan
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  Privasi
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  Cookies
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
