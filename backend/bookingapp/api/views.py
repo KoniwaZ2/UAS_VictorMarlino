@@ -14,12 +14,7 @@ def health_check(request):
 
 @api_view(['GET'])
 def search_flights(request):
-    """
-    Search for flights
-    Query params: origin, destination, departureDate, returnDate (optional), adults
-    """
     try:
-        # Extract query parameters
         params = {
             'origin': request.GET.get('origin'),
             'destination': request.GET.get('destination'),
@@ -29,14 +24,12 @@ def search_flights(request):
             'max': request.GET.get('max', 50)
         }
         
-        # Validate required parameters
         if not params['origin'] or not params['destination'] or not params['departureDate']:
             return Response(
                 {'error': 'Missing required parameters: origin, destination, departureDate'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Call Amadeus API
         results = amadeus_client.search_flights(params)
         return Response(results)
         
@@ -49,10 +42,6 @@ def search_flights(request):
 
 @api_view(['GET'])
 def search_locations(request):
-    """
-    Search for airport/city locations
-    Query params: keyword
-    """
     try:
         keyword = request.GET.get('keyword', '')
         
@@ -62,7 +51,6 @@ def search_locations(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Call Amadeus API
         results = amadeus_client.search_locations(keyword)
         return Response(results)
         
@@ -75,10 +63,6 @@ def search_locations(request):
 
 @api_view(['POST'])
 def confirm_flight_price(request):
-    """
-    Confirm flight price and availability
-    Body: { flightOffer: {...} }
-    """
     try:
         flight_offer = request.data.get('flightOffer')
         

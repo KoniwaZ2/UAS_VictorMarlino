@@ -1,19 +1,9 @@
-"""
-Amadeus API Client Service
-Handles all communication with Amadeus API with token caching
-"""
-
 import requests
 from datetime import datetime, timedelta
 from django.conf import settings
 
 
 class AmadeusClient:
-    """
-    Singleton client for Amadeus API
-    Manages OAuth token and API requests
-    """
-    
     _instance = None
     _access_token = None
     _token_expiry = None
@@ -29,15 +19,10 @@ class AmadeusClient:
         self.base_url = settings.AMADEUS_BASE_URL
     
     def get_access_token(self):
-        """
-        Get valid access token, refresh if expired
-        """
-        # Check if token is still valid
         if self._access_token and self._token_expiry:
             if datetime.now() < self._token_expiry:
                 return self._access_token
         
-        # Request new token
         try:
             response = requests.post(
                 'https://test.api.amadeus.com/v1/security/oauth2/token',
@@ -52,7 +37,6 @@ class AmadeusClient:
             
             data = response.json()
             self._access_token = data['access_token']
-            # Set expiry 5 minutes before actual expiry for safety
             expires_in = data.get('expires_in', 1799)
             self._token_expiry = datetime.now() + timedelta(seconds=expires_in - 300)
             
@@ -62,13 +46,9 @@ class AmadeusClient:
             raise Exception(f"Failed to get Amadeus access token: {str(e)}")
     
     def search_flights(self, params):
-        """
-        Search for flight offers
-        """
         try:
             token = self.get_access_token()
             
-            # Build query parameters
             query_params = {
                 'originLocationCode': params.get('origin'),
                 'destinationLocationCode': params.get('destination'),
@@ -78,7 +58,6 @@ class AmadeusClient:
                 'currencyCode': 'IDR',
             }
             
-            # Add return date if provided
             if params.get('returnDate'):
                 query_params['returnDate'] = params['returnDate']
             
@@ -102,9 +81,6 @@ class AmadeusClient:
             raise Exception(f"Failed to search flights: {str(e)}")
     
     def search_locations(self, keyword):
-        """
-        Search for airport/city locations
-        """
         try:
             token = self.get_access_token()
             
@@ -121,13 +97,9 @@ class AmadeusClient:
             return response.json()
             
         except requests.RequestException as e:
-            # Return empty data instead of error for location search
             return {'data': []}
     
     def confirm_flight_price(self, flight_offer):
-        """
-        Confirm flight price and availability
-        """
         try:
             token = self.get_access_token()
             
@@ -158,6 +130,4 @@ class AmadeusClient:
                 raise Exception(error_message)
             raise Exception(f"Failed to confirm flight price: {str(e)}")
 
-
-# Create singleton instance
 amadeus_client = AmadeusClient()
