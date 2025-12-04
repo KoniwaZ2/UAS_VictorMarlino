@@ -5,14 +5,6 @@ from .amadeus_service import amadeus_client
 
 
 @api_view(['GET'])
-def health_check(request):
-    """
-    Health check endpoint
-    """
-    return Response({'status': 'healthy', 'message': 'Flight Booking API is running'})
-
-
-@api_view(['GET'])
 def search_flights(request):
     try:
         params = {
@@ -72,7 +64,6 @@ def confirm_flight_price(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Call Amadeus API
         results = amadeus_client.confirm_flight_price(flight_offer)
         return Response(results)
         
