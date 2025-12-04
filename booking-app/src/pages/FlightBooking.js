@@ -88,34 +88,88 @@ const FlightBooking = () => {
   const validateForm = () => {
     if (!contactInfo.email || !contactInfo.phone) {
       setError("Mohon lengkapi informasi kontak");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(contactInfo.email)) {
-      setError("Format email tidak valid");
+      setError("Format email tidak valid. Contoh: nama@email.com");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return false;
+    }
+
+    const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
+    if (!phoneRegex.test(contactInfo.phone.replace(/[\s-]/g, ""))) {
+      setError(
+        "Format nomor telepon tidak valid. Contoh: 081234567890 atau +6281234567890"
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return false;
     }
 
     for (let i = 0; i < passengers.length; i++) {
       const p = passengers[i];
+
       if (!p.firstName || !p.lastName || !p.passportNumber || !p.dateOfBirth) {
-        setError(`Mohon lengkapi data penumpang ${i + 1}`);
+        setError(`Mohon lengkapi semua data penumpang ${i + 1}`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return false;
       }
 
-      if (p.passportNumber.length < 6 || p.passportNumber.length > 9) {
-        setError(`Nomor paspor penumpang ${i + 1} tidak valid (6-9 karakter)`);
+      const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+      if (!nameRegex.test(p.firstName.trim())) {
+        setError(
+          `Nama depan penumpang ${
+            i + 1
+          } tidak valid. Hanya huruf dan spasi (2-50 karakter)`
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return false;
+      }
+
+      if (!nameRegex.test(p.lastName.trim())) {
+        setError(
+          `Nama belakang penumpang ${
+            i + 1
+          } tidak valid. Hanya huruf dan spasi (2-50 karakter)`
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return false;
+      }
+
+      const passportRegex = /^[A-Z0-9]{6,9}$/;
+      const passportUpper = p.passportNumber.toUpperCase().trim();
+
+      if (!passportRegex.test(passportUpper)) {
+        setError(
+          `Nomor paspor penumpang ${
+            i + 1
+          } tidak valid. Format: 6-9 karakter huruf kapital dan angka. Contoh: A1234567 atau AB1234567`
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return false;
+      }
+
+      const hasLetter = /[A-Z]/.test(passportUpper);
+      const hasNumber = /[0-9]/.test(passportUpper);
+
+      if (!hasLetter || !hasNumber) {
+        setError(
+          `Nomor paspor penumpang ${
+            i + 1
+          } harus mengandung minimal 1 huruf dan 1 angka. Contoh: A1234567`
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return false;
       }
     }
 
-    // Check for duplicate passengers
     for (let i = 0; i < passengers.length; i++) {
       for (let j = i + 1; j < passengers.length; j++) {
         const p1 = passengers[i];
         const p2 = passengers[j];
 
-        // Check if passport numbers are the same
         if (
           p1.passportNumber &&
           p2.passportNumber &&
@@ -130,7 +184,6 @@ const FlightBooking = () => {
           return false;
         }
 
-        // Check if name and DOB are the same (to prevent same person with different passport typo)
         if (
           p1.firstName &&
           p1.lastName &&
@@ -164,10 +217,8 @@ const FlightBooking = () => {
     setLoading(true);
 
     try {
-      // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Generate mock booking reference
       const mockBookingRef =
         "MOCK-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
@@ -194,8 +245,6 @@ const FlightBooking = () => {
   const getAirlineName = (code) => {
     return dictionaries?.carriers?.[code] || code;
   };
-
-  // Success state is now handled by the modal overlay below
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -275,15 +324,62 @@ const FlightBooking = () => {
                       type="email"
                       value={contactInfo.email}
                       onChange={(e) =>
-                        handleContactChange("email", e.target.value)
+                        handleContactChange(
+                          "email",
+                          e.target.value.toLowerCase()
+                        )
                       }
                       placeholder="contoh@email.com"
-                      className="input-field"
+                      className={`input-field lowercase ${
+                        contactInfo.email &&
+                        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInfo.email)
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                          : contactInfo.email.includes("@")
+                          ? "border-green-300 focus:border-green-500 focus:ring-green-200"
+                          : ""
+                      }`}
                       required
                     />
                     <p className="text-xs text-slate-400 mt-1">
                       E-tiket akan dikirim ke sini
                     </p>
+                    {contactInfo.email && contactInfo.email.includes("@") && (
+                      <div className="mt-2">
+                        {/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                          contactInfo.email
+                        ) ? (
+                          <p className="text-xs text-green-600 flex items-center gap-1">
+                            <svg
+                              className="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Format email valid
+                          </p>
+                        ) : (
+                          <p className="text-xs text-red-600 flex items-center gap-1">
+                            <svg
+                              className="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Format email tidak valid
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
@@ -292,16 +388,63 @@ const FlightBooking = () => {
                     <input
                       type="tel"
                       value={contactInfo.phone}
-                      onChange={(e) =>
-                        handleContactChange("phone", e.target.value)
-                      }
-                      placeholder="081234567890"
-                      className="input-field"
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9+]/g, "");
+                        handleContactChange("phone", value);
+                      }}
+                      placeholder="081234567890 atau +6281234567890"
+                      className={`input-field ${
+                        contactInfo.phone &&
+                        !/^(\+62|62|0)[0-9]{9,12}$/.test(
+                          contactInfo.phone.replace(/[\s-]/g, "")
+                        )
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                          : contactInfo.phone.length >= 10
+                          ? "border-green-300 focus:border-green-500 focus:ring-green-200"
+                          : ""
+                      }`}
                       required
                     />
                     <p className="text-xs text-slate-400 mt-1">
                       Untuk notifikasi penting
                     </p>
+                    {contactInfo.phone && contactInfo.phone.length >= 10 && (
+                      <div className="mt-2">
+                        {/^(\+62|62|0)[0-9]{9,12}$/.test(
+                          contactInfo.phone.replace(/[\s-]/g, "")
+                        ) ? (
+                          <p className="text-xs text-green-600 flex items-center gap-1">
+                            <svg
+                              className="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Nomor telepon valid
+                          </p>
+                        ) : (
+                          <p className="text-xs text-red-600 flex items-center gap-1">
+                            <svg
+                              className="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Format nomor tidak valid
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -369,18 +512,77 @@ const FlightBooking = () => {
                         <input
                           type="text"
                           value={passenger.passportNumber}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const value = e.target.value
+                              .toUpperCase()
+                              .replace(/[^A-Z0-9]/g, "");
                             handlePassengerChange(
                               index,
                               "passportNumber",
-                              e.target.value.toUpperCase()
-                            )
-                          }
-                          placeholder="A1234567"
-                          className="input-field uppercase"
+                              value
+                            );
+                          }}
+                          placeholder="A1234567 atau AB1234567"
+                          className={`input-field uppercase ${
+                            passenger.passportNumber &&
+                            (passenger.passportNumber.length < 6 ||
+                              passenger.passportNumber.length > 9 ||
+                              !/^[A-Z0-9]{6,9}$/.test(
+                                passenger.passportNumber
+                              ) ||
+                              !/[A-Z]/.test(passenger.passportNumber) ||
+                              !/[0-9]/.test(passenger.passportNumber))
+                              ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                              : passenger.passportNumber.length >= 6
+                              ? "border-green-300 focus:border-green-500 focus:ring-green-200"
+                              : ""
+                          }`}
                           maxLength="9"
                           required
                         />
+                        <p className="text-xs text-slate-500 mt-1">
+                          Format: 6-9 karakter (huruf + angka). Contoh: A1234567
+                        </p>
+                        {passenger.passportNumber &&
+                          passenger.passportNumber.length >= 6 && (
+                            <div className="mt-2">
+                              {/^[A-Z0-9]{6,9}$/.test(
+                                passenger.passportNumber
+                              ) &&
+                              /[A-Z]/.test(passenger.passportNumber) &&
+                              /[0-9]/.test(passenger.passportNumber) ? (
+                                <p className="text-xs text-green-600 flex items-center gap-1">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                  Nomor paspor valid
+                                </p>
+                              ) : (
+                                <p className="text-xs text-red-600 flex items-center gap-1">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                  Harus kombinasi huruf dan angka
+                                </p>
+                              )}
+                            </div>
+                          )}
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
