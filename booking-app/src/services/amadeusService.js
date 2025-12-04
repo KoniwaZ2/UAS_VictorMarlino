@@ -1,12 +1,10 @@
 import axios from "axios";
 
-// Django Backend API Configuration
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
 
 class AmadeusService {
   constructor() {
-    // No need to store credentials - backend handles this
     this.apiClient = axios.create({
       baseURL: API_BASE_URL,
       headers: {
