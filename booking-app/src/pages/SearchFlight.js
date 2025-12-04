@@ -200,6 +200,7 @@ const SearchFlight = () => {
       );
 
       let returnResults = null;
+      let returnSearchParams = null;
       if (formData.tripType === "roundTrip" && formData.returnDate) {
         const returnParams = {
           origin: formData.destination,
@@ -209,6 +210,7 @@ const SearchFlight = () => {
         };
 
         returnResults = await amadeusService.searchFlights(returnParams);
+        returnSearchParams = returnParams;
       }
 
       navigate("/results", {
@@ -216,6 +218,7 @@ const SearchFlight = () => {
           flights: departureResults.data || [],
           returnFlights: returnResults?.data || [],
           searchParams: formData,
+          returnSearchParams: returnSearchParams,
           dictionaries: departureResults.dictionaries,
         },
       });

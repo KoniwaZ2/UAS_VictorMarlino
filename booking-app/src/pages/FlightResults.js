@@ -17,6 +17,7 @@ const FlightResults = () => {
     searchParams,
     dictionaries,
     returnFlights = [],
+    returnSearchParams = null,
     selectedDepartureFlight = null,
   } = location.state || {};
   const [sortedFlights, setSortedFlights] = useState([]);
@@ -42,7 +43,9 @@ const FlightResults = () => {
   }, [flights, navigate, selectedDepartureFlight, returnFlights]);
 
   useEffect(() => {
-    let filtered = [...flights];
+    // Use the correct data source based on selection state
+    const sourceFlights = isSelectingReturn && returnFlights.length > 0 ? returnFlights : flights;
+    let filtered = [...sourceFlights];
 
     if (selectedStops !== "all") {
       filtered = filtered.filter((flight) => {
@@ -69,7 +72,7 @@ const FlightResults = () => {
     });
 
     setSortedFlights(sorted);
-  }, [flights, sortBy, selectedStops]);
+  }, [flights, returnFlights, sortBy, selectedStops, isSelectingReturn]);
 
   const handleFlightSelect = (flight) => {
     if (searchParams?.tripType === "roundTrip" && !isSelectingReturn) {
@@ -89,6 +92,7 @@ const FlightResults = () => {
           flight: isSelectingReturn ? departureFlight : flight,
           returnFlight: isSelectingReturn ? flight : null,
           searchParams,
+          returnSearchParams: isSelectingReturn ? returnSearchParams : null,
           dictionaries,
         },
       });
@@ -288,7 +292,9 @@ const FlightResults = () => {
               </h1>
               <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
                 <span className="font-semibold text-slate-700">
-                  {searchParams?.origin}
+                  {isSelectingReturn && returnSearchParams 
+                    ? returnSearchParams.origin 
+                    : searchParams?.origin}
                 </span>
                 <svg
                   className="w-4 h-4"
@@ -304,13 +310,15 @@ const FlightResults = () => {
                   />
                 </svg>
                 <span className="font-semibold text-slate-700">
-                  {searchParams?.destination}
+                  {isSelectingReturn && returnSearchParams 
+                    ? returnSearchParams.destination 
+                    : searchParams?.destination}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-slate-300 mx-1"></span>
                 <span>
                   {formatDate(
-                    isSelectingReturn
-                      ? searchParams?.returnDate
+                    isSelectingReturn && returnSearchParams
+                      ? returnSearchParams.departureDate
                       : searchParams?.departureDate
                   )}
                 </span>

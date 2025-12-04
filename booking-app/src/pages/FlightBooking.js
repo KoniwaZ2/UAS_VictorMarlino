@@ -12,7 +12,7 @@ const FlightBooking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { flight, returnFlight, searchParams, dictionaries } =
+  const { flight, returnFlight, searchParams, returnSearchParams, dictionaries } =
     location.state || {};
 
   const [passengers, setPassengers] = useState([
