@@ -1,121 +1,62 @@
 import axios from "axios";
 
-// Konfigurasi Amadeus API
-const AMADEUS_CONFIG = {
-  clientId:
-    process.env.REACT_APP_AMADEUS_CLIENT_ID ||
-    "7Hy2eB3CyyttDtuDoTBpQfAqWxrMIJWC",
-  clientSecret:
-    process.env.REACT_APP_AMADEUS_CLIENT_SECRET || "aPsmJEFgxGQb0IXB",
-  baseURL:
-    process.env.REACT_APP_AMADEUS_BASE_URL || "https://test.api.amadeus.com/v2",
-};
+// Django Backend API Configuration
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
 
 class AmadeusService {
   constructor() {
-    this.accessToken = null;
-    this.tokenExpiry = null;
-  }
-
-  // Mendapatkan access token dari Amadeus
-  async getAccessToken() {
-    try {
-      if (
-        this.accessToken &&
-        this.tokenExpiry &&
-        new Date() < this.tokenExpiry
-      ) {
-        return this.accessToken;
-      }
-
-      const response = await axios.post(
-        "https://test.api.amadeus.com/v1/security/oauth2/token",
-        new URLSearchParams({
-          grant_type: "client_credentials",
-          client_id: AMADEUS_CONFIG.clientId,
-          client_secret: AMADEUS_CONFIG.clientSecret,
-        }),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      this.accessToken = response.data.access_token;
-      this.tokenExpiry = new Date(
-        new Date().getTime() + response.data.expires_in * 1000
-      );
-
-      return this.accessToken;
-    } catch (error) {
-      console.error("Error getting access token:", error);
-      throw new Error("Gagal mendapatkan akses ke Amadeus API");
-    }
+    // No need to store credentials - backend handles this
+    this.apiClient = axios.create({
+      baseURL: API_BASE_URL,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   async searchFlights(searchParams) {
     try {
-      const token = await this.getAccessToken();
-
       const params = {
-        originLocationCode: searchParams.origin,
-        destinationLocationCode: searchParams.destination,
+        origin: searchParams.origin,
+        destination: searchParams.destination,
         departureDate: searchParams.departureDate,
         adults: searchParams.adults || 1,
         max: searchParams.max || 50,
-        currencyCode: "IDR",
       };
 
       if (searchParams.returnDate) {
         params.returnDate = searchParams.returnDate;
       }
 
-      const response = await axios.get(
-        `${AMADEUS_CONFIG.baseURL}/shopping/flight-offers`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params,
-        }
-      );
+      const response = await this.apiClient.get("/flights/search/", {
+        params,
+      });
 
       return response.data;
     } catch (error) {
       console.error("Error searching flights:", error);
       if (error.response) {
         throw new Error(
-          error.response.data.errors?.[0]?.detail || "Gagal mencari penerbangan"
+          error.response.data.error || "Gagal mencari penerbangan"
         );
       }
       throw new Error(
-        "Gagal mencari penerbangan. Pastikan API credentials sudah benar."
+        "Gagal mencari penerbangan. Pastikan backend server berjalan."
       );
     }
   }
 
   async searchLocations(keyword) {
     try {
-      const token = await this.getAccessToken();
-
       console.log("Searching locations with keyword:", keyword);
 
-      const response = await axios.get(
-        "https://test.api.amadeus.com/v1/reference-data/locations",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            keyword,
-            subType: "CITY,AIRPORT",
-          },
-        }
-      );
+      const response = await this.apiClient.get("/locations/search/", {
+        params: { keyword },
+      });
 
       console.log("Location search results:", response.data.data);
-      return response.data.data;
+      return response.data.data || [];
     } catch (error) {
       console.error("Error searching locations:", error);
       if (error.response) {
@@ -127,23 +68,9 @@ class AmadeusService {
 
   async confirmFlightPrice(flightOffer) {
     try {
-      const token = await this.getAccessToken();
-
-      const response = await axios.post(
-        `${AMADEUS_CONFIG.baseURL}/shopping/flight-offers/pricing`,
-        {
-          data: {
-            type: "flight-offers-pricing",
-            flightOffers: [flightOffer],
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await this.apiClient.post("/flights/confirm-price/", {
+        flightOffer,
+      });
 
       return response.data;
     } catch (error) {
@@ -154,27 +81,12 @@ class AmadeusService {
 
   async createBooking(bookingData) {
     try {
-      const token = await this.getAccessToken();
-
-      const response = await axios.post(
-        `${AMADEUS_CONFIG.baseURL}/booking/flight-orders`,
-        bookingData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      return response.data;
+      // This would require implementing a booking endpoint in Django
+      // For now, returning mock data
+      console.log("Booking data:", bookingData);
+      throw new Error("Booking endpoint not yet implemented in backend");
     } catch (error) {
       console.error("Error creating booking:", error);
-      if (error.response) {
-        throw new Error(
-          error.response.data.errors?.[0]?.detail || "Gagal membuat booking"
-        );
-      }
       throw new Error("Gagal membuat booking penerbangan");
     }
   }

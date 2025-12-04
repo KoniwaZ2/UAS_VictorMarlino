@@ -84,7 +84,6 @@ const FlightResults = () => {
       setSelectedStops("all");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      // Go to booking page
       navigate("/booking", {
         state: {
           flight: isSelectingReturn ? departureFlight : flight,
