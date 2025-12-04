@@ -1,8 +1,3 @@
-"""
-API Views for Flight Booking Backend
-Proxy endpoints to Amadeus API with secure credentials
-"""
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
